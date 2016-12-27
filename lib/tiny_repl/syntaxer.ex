@@ -9,8 +9,12 @@ defmodule TinyRepl.Syntaxer do
         check_expression(lexemes)
     end
     |> case do
-      [] -> true
-      kek -> kek
+      [] ->
+        true
+      [unexpected | _] ->
+        {:error, "Unexpected token #{unexpected.type}"}
+      error ->
+        error
     end
   end
 
@@ -40,7 +44,8 @@ defmodule TinyRepl.Syntaxer do
     end
   end
 
-  defp check_multiplier([first | rest]) do
+  defp check_multiplier([]), do: {:error, "Unexpected token operator"}
+  defp check_multiplier([first | rest] = lexemes) do
     case first do
       %Token{type: :variable, value: _} ->
         rest
@@ -52,6 +57,9 @@ defmodule TinyRepl.Syntaxer do
         rest
         |> check_expression
         |> validate_closing_parenthesis
+
+      _ ->
+        lexemes
     end
   end
 
@@ -59,7 +67,7 @@ defmodule TinyRepl.Syntaxer do
     rest
   end
 
-  defp validate_closing_parenthesis(lexemes) do
-    {:error, ""}
+  defp validate_closing_parenthesis(_lexemes) do
+    {:error, "Unexpected end of input"}
   end
 end

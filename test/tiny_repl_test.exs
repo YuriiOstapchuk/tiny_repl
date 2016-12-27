@@ -24,23 +24,22 @@ defmodule TinyReplTest do
   end
 
   test "syntax checker" do
-    lexemes = [Token.number(20.0),
-               Token.operator("*"),
-               Token.opening_parenthesis,
-               Token.number(3.0),
-               Token.operator("-"),
-               Token.variable("x"),
-               Token.closing_parenthesis]
+    {:ok, lexemes} = Lexer.get_lexemes "20 * (3 - x)"
     assert Syntaxer.valid_syntax?(lexemes)
   end
 
   test "syntax checker error finding" do
-    lexemes = [Token.number(20.0),
-               Token.operator("*"),
-               Token.opening_parenthesis,
-               Token.number(3.0),
-               Token.operator("-"),
-               Token.variable("x")]
-    assert Syntaxer.valid_syntax?(lexemes) == {:error, ""}
+    {:ok, lexemes} = Lexer.get_lexemes "20 (3 - x"
+    assert Syntaxer.valid_syntax?(lexemes) == {:error, "Unexpected token opening_parenthesis"}
+  end
+
+  test "syntax checker error eof" do
+    {:ok, lexemes} = Lexer.get_lexemes "20 * (3 - x"
+    assert Syntaxer.valid_syntax?(lexemes) == {:error, "Unexpected end of input"}
+  end
+
+  test "syntax checker error multiple operators" do
+    {:ok, lexemes} = Lexer.get_lexemes "20 + *"
+    assert Syntaxer.valid_syntax?(lexemes) == {:error, "Unexpected token operator"}
   end
 end
