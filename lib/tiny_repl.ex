@@ -13,7 +13,7 @@ defmodule TinyRepl do
       {:ok, result} ->
         IO.inspect result
       {:error, message} ->
-        IO.inspect message
+        IO.puts message
     end
 
     read_line(line_number + 1)

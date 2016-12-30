@@ -2,13 +2,22 @@ defmodule TinyRepl.Syntaxer do
   alias TinyRepl.Token
 
   def valid_syntax?(lexemes) do
+    lexemes
+    |> check_grammar
+    |> validate
+  end
+
+  defp check_grammar(lexemes) do
     case lexemes do
       [%Token{type: :variable, value: _}, %Token{type: :assignment} | rest] ->
         check_expression(rest)
       _ ->
         check_expression(lexemes)
     end
-    |> case do
+  end
+
+  defp validate(lexemes) do
+    case lexemes do
       [] ->
         true
       [unexpected | _] ->
