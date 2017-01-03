@@ -5,16 +5,16 @@ defmodule TinyReplTest do
 
   test "lexeme parser simple expression" do
     assert Lexer.get_lexemes("1 + 2") == {:ok, [Token.number(1.0),
-                                                Token.operator("+"),
+                                                Token.plus,
                                                 Token.number(2.0)]}
   end
 
   test "lexeme parser complex expression" do
     assert Lexer.get_lexemes("20 * (3 - x)") == {:ok, [Token.number(20.0),
-                                                       Token.operator("*"),
+                                                       Token.mul,
                                                        Token.opening_parenthesis,
                                                        Token.number(3.0),
-                                                       Token.operator("-"),
+                                                       Token.minus,
                                                        Token.variable("x"),
                                                        Token.closing_parenthesis]}
   end

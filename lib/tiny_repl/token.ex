@@ -4,7 +4,10 @@ defmodule TinyRepl.Token do
 
   @token_types [:number,
                 :assignment,
-                :operator,
+                :plus,
+                :minus,
+                :mul,
+                :div,
                 :variable,
                 :opening_parenthesis,
                 :closing_parenthesis]

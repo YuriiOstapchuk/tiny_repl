@@ -31,8 +31,7 @@ defmodule TinyRepl.Syntaxer do
     lexemes
     |> check_term
     |> case do
-      [first | rest] when first in [%Token{type: :operator, value: "+"},
-                                    %Token{type: :operator, value: "-"}] ->
+      [first | rest] when first in [%Token{type: :plus}, %Token{type: :minus}] ->
         check_term(rest)
 
       lexemes ->
@@ -44,8 +43,7 @@ defmodule TinyRepl.Syntaxer do
     lexemes
     |> check_multiplier
     |> case do
-      [first | rest] when first in [%Token{type: :operator, value: "*"},
-                                    %Token{type: :operator, value: "/"}] ->
+      [first | rest] when first in [%Token{type: :mul}, %Token{type: :div}] ->
         check_multiplier(rest)
 
       lexemes ->

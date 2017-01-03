@@ -7,27 +7,32 @@ defmodule TinyRepl.Lexer do
     |> String.replace(~r/([\+\-\*\/\=\(\)]+)/, "@\\1@")
     |> String.split([" ", "@"], trim: true)
     |> Enum.map(fn part ->
-      cond do
-        part == "=" ->
+      case part do
+        "=" ->
           Token.assignment
-
-        part == "(" ->
+        "(" ->
           Token.opening_parenthesis
-
-        part == ")" ->
+        ")" ->
           Token.closing_parenthesis
+        "+" ->
+          Token.plus
+        "-" ->
+          Token.minus
+        "*" ->
+          Token.mul
+        "/" ->
+          Token.div
+        _ ->
+          cond do
+            String.match?(part, ~r/^[\-\+]?\d+(\.\d+)?$/) ->
+              {number, _} = Float.parse(part)
+              Token.number(number)
 
-        Enum.member?(~w(+ - * /), part) ->
-          Token.operator(part)
+            String.match?(part, ~r/^[A-z_][A-z_0-9]*$/) ->
+              Token.variable(part)
 
-        String.match?(part, ~r/^[\-\+]?\d+(\.\d+)?$/) ->
-          {number, _} = Float.parse(part)
-          Token.number(number)
-
-        String.match?(part, ~r/^[A-z_][A-z_0-9]*$/) ->
-          Token.variable(part)
-
-        true -> {:unknown, part}
+            true -> {:unknown, part}
+          end
       end
     end)
     |> validate_lexemes
