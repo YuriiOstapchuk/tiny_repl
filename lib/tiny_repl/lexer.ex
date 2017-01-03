@@ -6,36 +6,42 @@ defmodule TinyRepl.Lexer do
     |> String.trim
     |> String.replace(~r/([\+\-\*\/\=\(\)]+)/, "@\\1@")
     |> String.split([" ", "@"], trim: true)
-    |> Enum.map(fn part ->
-      case part do
-        "=" ->
-          Token.assignment
-        "(" ->
-          Token.opening_parenthesis
-        ")" ->
-          Token.closing_parenthesis
-        "+" ->
-          Token.plus
-        "-" ->
-          Token.minus
-        "*" ->
-          Token.mul
-        "/" ->
-          Token.div
-        _ ->
-          cond do
-            String.match?(part, ~r/^[\-\+]?\d+(\.\d+)?$/) ->
-              {number, _} = Float.parse(part)
-              Token.number(number)
-
-            String.match?(part, ~r/^[A-z_][A-z_0-9]*$/) ->
-              Token.variable(part)
-
-            true -> {:unknown, part}
-          end
-      end
-    end)
+    |> Enum.map(&determine_token/1)
     |> validate_lexemes
+  end
+
+  defp determine_token(part) do
+    case part do
+      "=" ->
+        Token.assignment
+      "(" ->
+        Token.opening_parenthesis
+      ")" ->
+        Token.closing_parenthesis
+      "+" ->
+        Token.plus
+      "-" ->
+        Token.minus
+      "*" ->
+        Token.mul
+      "/" ->
+        Token.div
+      _ ->
+        determine_complex_token(part)
+    end
+  end
+
+  defp determine_complex_token(part) do
+    cond do
+      String.match?(part, ~r/^[\-\+]?\d+(\.\d+)?$/) ->
+        {number, _} = Float.parse(part)
+        Token.number(number)
+
+      String.match?(part, ~r/^[A-z_][A-z_0-9]*$/) ->
+        Token.variable(part)
+
+      true -> {:unknown, part}
+    end
   end
 
   defp validate_lexemes(lexemes) do

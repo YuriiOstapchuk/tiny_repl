@@ -21,7 +21,7 @@ defmodule TinyRepl.Parser do
          true <- Syntaxer.valid_syntax?(lexemes),
          ast <- Ast.build(lexemes) do
       result = 0
-      {:reply, {:ok, lexemes}, state}
+      {:reply, {:ok, ast}, state}
     else
       error ->
         {:reply, error, state}
