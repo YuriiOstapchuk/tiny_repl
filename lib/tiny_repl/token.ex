@@ -1,6 +1,6 @@
 defmodule TinyRepl.Token do
-  @enforce_keys [:type]
   defstruct [:type, :value]
+  @enforce_keys [:type]
 
   @token_types [:number,
                 :assignment,

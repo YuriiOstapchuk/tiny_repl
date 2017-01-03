@@ -1,6 +1,6 @@
 defmodule TinyRepl.Parser do
   use GenServer
-  alias TinyRepl.{Token, Lexer, Syntaxer}
+  alias TinyRepl.{Lexer, Syntaxer, Ast}
 
   @name :parser
 
@@ -18,7 +18,8 @@ defmodule TinyRepl.Parser do
 
   def handle_call({:evaluate, input}, _from, state) do
     with {:ok, lexemes} <- Lexer.get_lexemes(input),
-         true <- Syntaxer.valid_syntax?(lexemes) do
+         true <- Syntaxer.valid_syntax?(lexemes),
+         ast <- Ast.build(lexemes) do
       result = 0
       {:reply, {:ok, lexemes}, state}
     else
