@@ -7,7 +7,7 @@ defmodule TinyRepl.Mixfile do
      elixir: "~> 1.3",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     escript: [main_module: TinyRepl],
+     escript: escript,
      aliases: aliases,
      deps: deps]
   end
@@ -15,6 +15,11 @@ defmodule TinyRepl.Mixfile do
   def application do
     [mod: {TinyRepl, []},
      applications: [:logger]]
+  end
+
+  def escript do
+    [main_module: TinyRepl,
+     path: "./bin/tiny_repl"]
   end
 
   defp deps do
