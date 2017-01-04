@@ -28,7 +28,7 @@ defmodule TinyRepl.Syntaxer do
   end
 
   defp repeat([first | rest] = lexemes, repeated, next) do
-    if Enum.member?(repeated, first) do
+    if first in repeated do
       rest
       |> next.()
       |> repeat(repeated, next)
