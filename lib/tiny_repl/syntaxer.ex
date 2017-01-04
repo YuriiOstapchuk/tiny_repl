@@ -54,10 +54,7 @@ defmodule TinyRepl.Syntaxer do
   defp check_multiplier([]), do: {:error, "Unexpected token operator"}
   defp check_multiplier([first | rest] = lexemes) do
     case first do
-      %Token{type: :variable, value: _} ->
-        rest
-
-      %Token{type: :number, value: _} ->
+      %Token{type: type, value: _} when type in ~w[variable number]a ->
         rest
 
       %Token{type: :opening_parenthesis} ->

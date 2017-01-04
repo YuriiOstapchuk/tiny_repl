@@ -25,7 +25,12 @@ defmodule TinyReplTest do
 
   test "syntax checker" do
     {:ok, lexemes} = Lexer.get_lexemes "20 * (3 - x)"
-    assert Syntaxer.valid_syntax?(lexemes)
+    assert Syntaxer.valid_syntax?(lexemes) == true
+  end
+
+  test "syntax checker big expression with assignment" do
+    {:ok, lexemes} = Lexer.get_lexemes "a = 20 + 1 * 4 * 20 / 10 + 2 * 6 - 5"
+    assert Syntaxer.valid_syntax?(lexemes) == true
   end
 
   test "syntax checker error finding" do

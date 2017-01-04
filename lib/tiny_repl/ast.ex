@@ -9,34 +9,46 @@ defmodule TinyRepl.Ast do
   def build(lexemes) do
     lexemes
     |> Enum.reduce(%{expressions: [], operators: []}, &add_lexeme/2)
+    |> complete_building
   end
 
   defp add_lexeme(lexeme, %{expressions: expressions, operators: operators} = state) do
-    IO.inspect lexeme.type
-    cond do
-      # lexeme.type == :opening_parenthesis ->
-      #   %{state | operators: [lexeme | operators]}
+    case lexeme do
+      %Token{type: :opening_parenthesis} ->
+        %{state | operators: [lexeme | operators]}
 
-      lexeme.type == :number ->
-        %Token{type: :number, value: number} = lexeme
+      %Token{type: :number, value: number} ->
         %{state | expressions: [number | expressions]}
 
-      Enum.member?(~w[plus minus mul div]a, lexeme.type) ->
-        new_state =
-          operators
-          |> Enum.reduce_while(state, fn _, %{expressions: expressions, operators: [op | ops]} = acc ->
-            IO.inspect acc
-            if @precedences[op.type] >= @precedences[lexeme.type] do
-              [e2, e1 | exps] = expressions
-              {:cont, %{expressions: [{op, e1, e2} | exps], operators: ops}}
-            else
-              {:halt, acc}
-            end
-          end)
+      %Token{type: :variable, value: variable} ->
+        %{state | expressions: [{:unref, variable} | expressions]}
 
+      %Token{type: operator} when operator in ~w[plus minus mul div]a ->
+        new_state = parse_operator(lexeme, state)
         %{new_state | operators: [lexeme | new_state.operators]}
 
-      true ->
+      _ ->
+        raise "Cannot build AST"
+    end
+  end
+
+  defp parse_operator(_, %{operators: []} = acc), do: acc
+  defp parse_operator(lexeme, %{expressions: expressions, operators: [op | ops]} = acc) do
+    if @precedences[op.type] >= @precedences[lexeme.type] do
+      [e2, e1 | exps] = expressions
+      parse_operator(lexeme, %{expressions: [{op, e1, e2} | exps], operators: ops})
+    else
+      acc
+    end
+  end
+
+  defp complete_building(state) do
+    case state do
+      %{expressions: [e], operators: []} ->
+        e
+      %{expressions: [e2, e1 | exps], operators: [op | ops]} ->
+        complete_building(%{expressions: [{op, e1, e2} | exps], operators: ops})
+      _ ->
         raise "Cannot build AST"
     end
   end
