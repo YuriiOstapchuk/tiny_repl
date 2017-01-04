@@ -27,28 +27,27 @@ defmodule TinyRepl.Syntaxer do
     end
   end
 
-  def check_expression(lexemes) do
+  defp repeat([first | rest] = lexemes, repeated, next) do
+    if Enum.member?(repeated, first) do
+      rest
+      |> next.()
+      |> repeat(repeated, next)
+    else
+      lexemes
+    end
+  end
+  defp repeat(lexemes, _, _), do: lexemes
+
+  defp check_expression(lexemes) do
     lexemes
     |> check_term
-    |> case do
-      [first | rest] when first in [%Token{type: :plus}, %Token{type: :minus}] ->
-        check_term(rest)
-
-      lexemes ->
-        lexemes
-    end
+    |> repeat([%Token{type: :plus}, %Token{type: :minus}], &check_term/1)
   end
 
   defp check_term(lexemes) do
     lexemes
     |> check_multiplier
-    |> case do
-      [first | rest] when first in [%Token{type: :mul}, %Token{type: :div}] ->
-        check_multiplier(rest)
-
-      lexemes ->
-        lexemes
-    end
+    |> repeat([%Token{type: :mul}, %Token{type: :div}], &check_multiplier/1)
   end
 
   defp check_multiplier([]), do: {:error, "Unexpected token operator"}
