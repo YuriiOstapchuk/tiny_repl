@@ -1,7 +1,7 @@
 defmodule TinyReplTest do
   use ExUnit.Case
 
-  alias TinyRepl.{Lexer, Token, Syntaxer}
+  alias TinyRepl.{Lexer, Token, Syntaxer, Ast}
 
   test "lexeme parser simple expression" do
     assert Lexer.get_lexemes("1 + 2") == {:ok, [Token.number(1.0),
@@ -20,7 +20,7 @@ defmodule TinyReplTest do
   end
 
   test "lexeme parser unknown" do
-    assert Lexer.get_lexemes("1 # 4") == {:error, [{:unknown, "#"}]}
+    assert Lexer.get_lexemes("1 # 4 $ 5") == {:error, "Unknown tokens: #, $"}
   end
 
   test "syntax checker" do
@@ -29,7 +29,7 @@ defmodule TinyReplTest do
   end
 
   test "syntax checker big expression with assignment" do
-    {:ok, lexemes} = Lexer.get_lexemes "a = 20 + 1 * 4 * 20 / 10 + 2 * 6 - 5"
+    {:ok, lexemes} = Lexer.get_lexemes "a = 20 + 1 * 4 * (20 / (10 + 2) * 6 - 5)"
     assert Syntaxer.valid_syntax?(lexemes) == true
   end
 
@@ -46,5 +46,25 @@ defmodule TinyReplTest do
   test "syntax checker error multiple operators" do
     {:ok, lexemes} = Lexer.get_lexemes "20 + *"
     assert Syntaxer.valid_syntax?(lexemes) == {:error, "Unexpected token operator"}
+  end
+
+  test "ast assignment" do
+    {:ok, lexemes} = Lexer.get_lexemes "a = (1 + x)"
+    assert Ast.build(lexemes) == {Token.assignment, Token.variable("a"), {Token.plus, 1.0, {:unref, "x"}}}
+  end
+
+  test "ast parenthesis" do
+    {:ok, lexemes} = Lexer.get_lexemes "(1 + 2)"
+    assert Ast.build(lexemes) == {Token.plus, 1.0, 2.0}
+  end
+
+  test "ast complex" do
+    {:ok, lexemes} = Lexer.get_lexemes "a = 20 + 1 * 4 * (b / (10 + 2) * 6 - c)"
+    assert Ast.build(lexemes) ==
+      {Token.assignment, Token.variable("a"),
+        {Token.plus, 20.0,
+          {Token.mul, {Token.mul, 1.0, 4.0},
+            {Token.minus,
+              {Token.mul, {Token.div, {:unref, "b"}, {Token.plus, 10.0, 2.0}}, 6.0}, {:unref, "c"}}}}}
   end
 end

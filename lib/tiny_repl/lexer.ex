@@ -55,7 +55,7 @@ defmodule TinyRepl.Lexer do
     if Enum.count(unknown) == 0 do
       {:ok, lexemes}
     else
-      {:error, unknown}
+      {:error, "Unknown tokens: " <> Enum.map_join(unknown, ", ", fn {:unknown, token} -> token end)}
     end
   end
 end

@@ -2,15 +2,17 @@ defmodule TinyRepl.Token do
   defstruct [:type, :value]
   @enforce_keys [:type]
 
-  @token_types [:number,
-                :assignment,
-                :plus,
-                :minus,
-                :mul,
-                :div,
-                :variable,
-                :opening_parenthesis,
-                :closing_parenthesis]
+  @token_types [
+    :number,
+    :assignment,
+    :plus,
+    :minus,
+    :mul,
+    :div,
+    :variable,
+    :opening_parenthesis,
+    :closing_parenthesis
+  ]
 
   @token_types
   |> Enum.each(fn name ->
