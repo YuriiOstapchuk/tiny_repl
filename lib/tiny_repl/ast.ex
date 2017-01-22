@@ -15,7 +15,6 @@ defmodule TinyRepl.Ast do
     lexemes
     |> Enum.reduce(%{expressions: [], operators: []}, &add_lexeme/2)
     |> complete_building
-    |> format_variables
   end
 
   defp add_lexeme(lexeme, %{expressions: expressions, operators: operators} = state) do
@@ -69,25 +68,47 @@ defmodule TinyRepl.Ast do
     end
   end
 
-  defp format_variables({%Token{type: :assignment}, variable, value}) do
-    {%Token{type: :assignment}, variable, unref_variables(value)}
-  end
-  defp format_variables(state), do: state
+  @number_operations %{
+    plus:  & &1 + &2,
+    minus: & &1 - &2,
+    mul:   & &1 * &2,
+    div:   & &1 / &2
+  }
 
-  defp unref_variables(item) when is_tuple(item) do
+  def evaluate(item, variables) when is_tuple(item) do
     case item do
-      {op, %Token{type: :variable, value: var}, val} ->
-        {op, {:unref, var}, unref_variables(val)}
+      {%Token{type: :assignment}, variable, value} ->
+        case evaluate(value, variables) do
+          {:ok, result} ->
+            {:ok, {result, Map.put(variables, variable.value, result)}}
 
-      {op, val, %Token{type: :variable, value: var}} ->
-        {op, unref_variables(val), {:unref, var}}
+          {:error, msg} ->
+            {:error, msg}
+        end
 
-      {op, %Token{type: :variable, value: var1}, %Token{type: :variable, value: var2}} ->
-        {op, {:unref, var1}, {:unref, var2}}
+      {%Token{type: type}, val1, val2} when type in ~w[plus minus mul div]a ->
+        case {evaluate(val1, variables), evaluate(val2, variables)} do
+          {{:error, msg}, _} ->
+            {:error, msg}
 
-      {op, val1, val2} ->
-        {op, unref_variables(val1), unref_variables(val2)}
+          {_, {:error, msg}} ->
+            {:error, msg}
+
+          {{:ok, res1}, {:ok, res2}} ->
+            {:ok, @number_operations[type].(res1, res2)}
+        end
     end
   end
-  defp unref_variables(item), do: item
+
+  def evaluate(%Token{type: :variable, value: var}, variables) do
+    if Map.has_key?(variables, var) do
+      {:ok, variables[var]}
+    else
+      {:error, "#{var} is undefined"}
+    end
+  end
+
+  def evaluate(item, _) do
+    {:ok, item}
+  end
 end

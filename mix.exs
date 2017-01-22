@@ -7,9 +7,9 @@ defmodule TinyRepl.Mixfile do
      elixir: "~> 1.3",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     escript: escript,
-     aliases: aliases,
-     deps: deps]
+     escript: escript(),
+     aliases: aliases(),
+     deps: deps()]
   end
 
   def application do
@@ -23,7 +23,7 @@ defmodule TinyRepl.Mixfile do
   end
 
   defp deps do
-    [{:credo, "~> 0.5", only: [:dev, :test]}]
+    []
   end
 
   defp aliases do

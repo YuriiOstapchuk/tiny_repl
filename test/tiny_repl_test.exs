@@ -1,7 +1,7 @@
 defmodule TinyReplTest do
   use ExUnit.Case
 
-  alias TinyRepl.{Lexer, Token, Syntaxer, Ast}
+  alias TinyRepl.{Lexer, Token, Syntaxer, Ast, Parser}
 
   test "lexeme parser simple expression" do
     assert Lexer.get_lexemes("1 + 2") == {:ok, [Token.number(1.0),
@@ -50,7 +50,7 @@ defmodule TinyReplTest do
 
   test "ast assignment" do
     {:ok, lexemes} = Lexer.get_lexemes "a = (1 + x)"
-    assert Ast.build(lexemes) == {Token.assignment, Token.variable("a"), {Token.plus, 1.0, {:unref, "x"}}}
+    assert Ast.build(lexemes) == {Token.assignment, Token.variable("a"), {Token.plus, 1.0, Token.variable("x")}}
   end
 
   test "ast parenthesis" do
@@ -65,6 +65,25 @@ defmodule TinyReplTest do
         {Token.plus, 20.0,
           {Token.mul, {Token.mul, 1.0, 4.0},
             {Token.minus,
-              {Token.mul, {Token.div, {:unref, "b"}, {Token.plus, 10.0, 2.0}}, 6.0}, {:unref, "c"}}}}}
+              {Token.mul, {Token.div, Token.variable("b"), {Token.plus, 10.0, 2.0}}, 6.0}, Token.variable("c")}}}}
+  end
+
+  test "ast evaluation" do
+    input = "20 + 1 * 4 * (b / (10 + 2) * 6 - c)"
+
+    {:reply, {:ok, value}, _} =
+      Parser.handle_call({:evaluate, input}, self(), %{variables: %{"b" => 5, "c" => 10}})
+    assert value == -10
+  end
+
+  test "assignment evaluation" do
+    input = "a = 10"
+
+    {:reply, {:ok, value}, %{variables: variables}} =
+      Parser.handle_call({:evaluate, input}, self(), %{variables: %{}})
+
+    assert value == 10
+    assert Map.has_key?(variables, "a")
+    assert variables["a"] == 10
   end
 end
