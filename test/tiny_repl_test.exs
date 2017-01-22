@@ -72,7 +72,7 @@ defmodule TinyReplTest do
     input = "20 + 1 * 4 * (b / (10 + 2) * 6 - c)"
 
     {:reply, {:ok, value}, _} =
-      Parser.handle_call({:evaluate, input}, self(), %{variables: %{"b" => 5, "c" => 10}})
+      Parser.handle_call({:evaluate, input}, {}, %{variables: %{"b" => 5, "c" => 10}})
     assert value == -10
   end
 
@@ -80,10 +80,19 @@ defmodule TinyReplTest do
     input = "a = 10"
 
     {:reply, {:ok, value}, %{variables: variables}} =
-      Parser.handle_call({:evaluate, input}, self(), %{variables: %{}})
+      Parser.handle_call({:evaluate, input}, {}, %{variables: %{}})
 
     assert value == 10
     assert Map.has_key?(variables, "a")
     assert variables["a"] == 10
+  end
+
+  test "evaluation error" do
+    input = "5 + a"
+
+    {:reply, {:error, message}, _} =
+      Parser.handle_call({:evaluate, input}, {}, %{variables: %{}})
+
+    assert message == "a is undefined"
   end
 end
