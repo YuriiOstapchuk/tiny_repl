@@ -1,24 +1,18 @@
 # TinyRepl
 
-**TODO: Add description**
+Allows you to evaluate mathematical expressions with variables support
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed as:
+Clone the repo and run mix build inside the directory
 
-  1. Add `tiny_repl` to your list of dependencies in `mix.exs`:
+### Examples
 
-    ```elixir
-    def deps do
-      [{:tiny_repl, "~> 0.1.0"}]
-    end
-    ```
-
-  2. Ensure `tiny_repl` is started before your application:
-
-    ```elixir
-    def application do
-      [applications: [:tiny_repl]]
-    end
-    ```
-
+```
+tiny_repl(1)> a = 10
+10.0
+tiny_repl(2)> b = 3 + a
+13.0
+tiny_repl(3)> a + b * 2 - 20 / a * (5 + 27)
+-28.0
+```
