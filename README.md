@@ -15,4 +15,6 @@ tiny_repl(2)> b = 3 + a
 13.0
 tiny_repl(3)> a + b * 2 - 20 / a * (5 + 27)
 -28.0
+tiny_repl(4)> c + 1
+variable c is not defined
 ```

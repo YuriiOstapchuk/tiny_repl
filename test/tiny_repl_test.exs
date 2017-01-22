@@ -93,6 +93,6 @@ defmodule TinyReplTest do
     {:reply, {:error, message}, _} =
       Parser.handle_call({:evaluate, input}, {}, %{variables: %{}})
 
-    assert message == "a is undefined"
+    assert message == "variable a is not defined"
   end
 end

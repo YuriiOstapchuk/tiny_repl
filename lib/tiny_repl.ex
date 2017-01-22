@@ -11,9 +11,9 @@ defmodule TinyRepl do
 
     case Parser.evaluate(line) do
       {:ok, result} ->
-        IO.inspect result
+        IO.puts IO.ANSI.bright <> "#{result}" <> IO.ANSI.reset
       {:error, message} ->
-        IO.puts(IO.ANSI.red <> message <> IO.ANSI.reset)
+        IO.puts IO.ANSI.red <> message <> IO.ANSI.reset
     end
 
     read_line(line_number + 1)

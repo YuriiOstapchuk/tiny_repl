@@ -104,7 +104,7 @@ defmodule TinyRepl.Ast do
     if Map.has_key?(variables, var) do
       {:ok, variables[var]}
     else
-      {:error, "#{var} is undefined"}
+      {:error, "variable #{var} is not defined"}
     end
   end
 
